@@ -306,16 +306,58 @@ bool checkAccess(String cardID, String day, String currentTime, String& lecturer
         scheduleItem.get(allowedCard, "card_id");
         scheduleItem.get(lecturerData, "lecturer");
 
-        if (allowedCard.stringValue == cardID) {
-          lecturer = lecturerData.stringValue;  // Simpan nama dosen meskipun hari atau waktu tidak cocok
+        bool cardMatch = false;
+        String matchedLecturer = "";
 
-          if (scheduledDay.stringValue == day &&
-              currentTime >= startTime.stringValue &&
-              currentTime <= endTime.stringValue) {
-
-            Serial.println(">>> Akses diizinkan oleh Firebase (Array)!");
-            return true;
+        // --- NEW LOGIC: Support both array and string for card_id and lecturer ---
+        if (allowedCard.type == FirebaseJson::JSON_ARRAY) {
+          // card_id is an array, so check if cardID is in the array
+          FirebaseJsonArray cardArray;
+          cardArray.setJsonArrayData(allowedCard.stringValue);
+          for (size_t j = 0; j < cardArray.size(); j++) {
+            FirebaseJsonData cardItem;
+            cardArray.get(cardItem, j);
+            if (cardItem.stringValue == cardID) {
+              cardMatch = true;
+              // If lecturer is also array, get the corresponding lecturer
+              if (lecturerData.type == FirebaseJson::JSON_ARRAY) {
+                FirebaseJsonArray lecturerArray;
+                lecturerArray.setJsonArrayData(lecturerData.stringValue);
+                FirebaseJsonData lecturerItem;
+                // If lecturer array has the same index, use it; otherwise, use all lecturers
+                if (lecturerArray.get(lecturerItem, j)) {
+                  matchedLecturer = lecturerItem.stringValue;
+                } else {
+                  // If index out of range, concatenate all lecturers
+                  for (size_t k = 0; k < lecturerArray.size(); k++) {
+                    FirebaseJsonData lItem;
+                    lecturerArray.get(lItem, k);
+                    if (matchedLecturer.length() > 0) matchedLecturer += ", ";
+                    matchedLecturer += lItem.stringValue;
+                  }
+                }
+              } else {
+                // lecturer is a string
+                matchedLecturer = lecturerData.stringValue;
+              }
+              break;
+            }
           }
+        } else if (allowedCard.stringValue == cardID) {
+          // card_id is a string, compare directly
+          cardMatch = true;
+          matchedLecturer = lecturerData.stringValue;
+        }
+        // --- END NEW LOGIC ---
+
+        // If card matches, check day and time
+        if (cardMatch &&
+            scheduledDay.stringValue == day &&
+            currentTime >= startTime.stringValue &&
+            currentTime <= endTime.stringValue) {
+          lecturer = matchedLecturer;
+          Serial.println(">>> Akses diizinkan oleh Firebase (Array or String)!");
+          return true;
         }
       }
     }
@@ -324,6 +366,6 @@ bool checkAccess(String cardID, String day, String currentTime, String& lecturer
     Serial.println(fbdo.errorReason());
   }
 
-  Serial.println(">>> Akses ditolak oleh Firebase (Array)!");
+  Serial.println(">>> Akses ditolak oleh Firebase (Array or String)!");
   return false;
 }
