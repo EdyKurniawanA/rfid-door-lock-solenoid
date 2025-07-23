@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Dashboard Timestamp</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        .info {
+            background: #e2e3e5;
+            color: #383d41;
+            font-size: 12px;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+        .instructions {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .instructions h4 {
+            margin-top: 0;
+            color: #0c5460;
+        }
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin: 5px 0;
+        }
+        .firebase-config {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug Dashboard Timestamp</h1>
+        <p>Tool untuk mengidentifikasi masalah timestamp yang tidak terbaca di dashboard</p>
+
+        <div class="instructions">
+            <h4>📋 Cara Menggunakan:</h4>
+            <ol>
+                <li><strong>Buka Developer Tools (F12)</strong> dan lihat tab Console</li>
+                <li><strong>Klik "Load Debug Script"</strong> untuk memuat script debug</li>
+                <li><strong>Klik "Inspect All Data"</strong> untuk melihat semua data Firebase</li>
+                <li><strong>Analisis output di console</strong> untuk identifikasi masalah</li>
+                <li><strong>Test dengan data baru</strong> jika diperlukan</li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h3>🔥 Firebase Connection</h3>
+            <div class="firebase-config">
+                <strong>Firebase Config:</strong><br>
+                Project: monitoring-ruang-kelas<br>
+                Database: https://monitoring-ruang-kelas-default-rtdb.firebaseio.com
+            </div>
+            <button onclick="initFirebase()">Initialize Firebase</button>
+            <button onclick="testConnection()">Test Connection</button>
+            <div id="firebase-status"></div>
+        </div>
+
+        <div class="section">
+            <h3>📊 Debug Data Firebase</h3>
+            <button onclick="loadDebugScript()">Load Debug Script</button>
+            <button onclick="inspectAllData()">Inspect All Data</button>
+            <button onclick="inspectRoom1()">Inspect Room1</button>
+            <button onclick="clearConsole()">Clear Console</button>
+            <div id="debug-results"></div>
+        </div>
+
+        <div class="section">
+            <h3>➕ Test Data</h3>
+            <button onclick="addTestData()">Add Test Data</button>
+            <button onclick="addMultipleFormats()">Add Multiple Formats</button>
+            <button onclick="clearTestData()">Clear Test Data</button>
+            <div id="test-results"></div>
+        </div>
+
+        <div class="section">
+            <h3>🎯 Test Dashboard Function</h3>
+            <button onclick="testDashboardFunction()">Test formatTimestamp Function</button>
+            <div id="function-test-results"></div>
+        </div>
+
+        <div class="section">
+            <h3>📋 Console Output</h3>
+            <p><em>Buka Developer Tools (F12) dan lihat tab Console untuk debug info lengkap</em></p>
+            <p><strong>Fungsi yang tersedia setelah load debug script:</strong></p>
+            <ul>
+                <li><code>inspectAllFirebaseData()</code> - Lihat semua data Firebase</li>
+                <li><code>inspectRoomData('room1')</code> - Lihat data room1</li>
+                <li><code>debugTimestamp(timestamp, context)</code> - Debug timestamp detail</li>
+                <li><code>testTimestampParsing(timestamp)</code> - Test parsing timestamp</li>
+                <li><code>addTestDataWithDifferentFormats()</code> - Tambah data test</li>
+                <li><code>clearTestData()</code> - Hapus data test</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        let db = null;
+        let firebaseInitialized = false;
+        let debugScriptLoaded = false;
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbJXnRwSGreNGDtP9L7fHx6WUwncMYA9M",
+            authDomain: "monitoring-ruang-kelas.firebaseapp.com",
+            databaseURL: "https://monitoring-ruang-kelas-default-rtdb.firebaseio.com",
+            projectId: "monitoring-ruang-kelas",
+            storageBucket: "monitoring-ruang-kelas.firebasestorage.app",
+            messagingSenderId: "811142630328",
+            appId: "1:811142630328:web:2be668fbe63c372c1a5d4d",
+            measurementId: "G-GTE9ZMV222"
+        };
+
+        // Initialize Firebase
+        function initFirebase() {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                firebaseInitialized = true;
+                updateStatus('Firebase berhasil diinisialisasi', 'success');
+                console.log('✅ Firebase initialized successfully');
+            } catch (error) {
+                updateStatus('Error inisialisasi Firebase: ' + error.message, 'error');
+                console.error('❌ Firebase initialization error:', error);
+            }
+        }
+
+        // Test Firebase connection
+        function testConnection() {
+            if (!firebaseInitialized) {
+                updateStatus('Firebase belum diinisialisasi', 'error');
+                return;
+            }
+
+            db.ref('.info/connected').once('value')
+                .then((snapshot) => {
+                    if (snapshot.val()) {
+                        updateStatus('✅ Terhubung ke Firebase', 'success');
+                    } else {
+                        updateStatus('❌ Tidak terhubung ke Firebase', 'error');
+                    }
+                })
+                .catch((error) => {
+                    updateStatus('❌ Error koneksi: ' + error.message, 'error');
+                });
+        }
+
+        // Load debug script
+        function loadDebugScript() {
+            const results = document.getElementById('debug-results');
+            results.innerHTML = '<div class="info">Loading debug script...</div>';
+
+            // Load script dari file debug-timestamp.js
+            fetch('debug-timestamp.js')
+                .then(response => response.text())
+                .then(scriptContent => {
+                    try {
+                        eval(scriptContent);
+                        debugScriptLoaded = true;
+                        results.innerHTML = '<div class="result success">✅ Debug script loaded successfully!</div>';
+                        console.log('✅ Debug script loaded');
+                    } catch (error) {
+                        results.innerHTML = `<div class="result error">❌ Error loading script: ${error.message}</div>`;
+                        console.error('❌ Error loading debug script:', error);
+                    }
+                })
+                .catch(error => {
+                    results.innerHTML = `<div class="result error">❌ Error fetching script: ${error.message}</div>`;
+                    console.error('❌ Error fetching debug script:', error);
+                });
+        }
+
+        // Inspect all data
+        function inspectAllData() {
+            if (!debugScriptLoaded) {
+                const results = document.getElementById('debug-results');
+                results.innerHTML = '<div class="result warning">⚠️ Load debug script terlebih dahulu</div>';
+                return;
+            }
+
+            if (typeof inspectAllFirebaseData === 'function') {
+                inspectAllFirebaseData();
+                const results = document.getElementById('debug-results');
+                results.innerHTML = '<div class="result info">🔍 Inspecting all Firebase data... Check console for details</div>';
+            } else {
+                const results = document.getElementById('debug-results');
+                results.innerHTML = '<div class="result error">❌ Debug script not loaded properly</div>';
+            }
+        }
+
+        // Inspect room1 data
+        function inspectRoom1() {
+            if (!debugScriptLoaded) {
+                const results = document.getElementById('debug-results');
+                results.innerHTML = '<div class="result warning">⚠️ Load debug script terlebih dahulu</div>';
+                return;
+            }
+
+            if (typeof inspectRoomData === 'function') {
+                inspectRoomData('room1');
+                const results = document.getElementById('debug-results');
+                results.innerHTML = '<div class="result info">🔍 Inspecting room1 data... Check console for details</div>';
+            } else {
+                const results = document.getElementById('debug-results');
+                results.innerHTML = '<div class="result error">❌ Debug script not loaded properly</div>';
+            }
+        }
+
+        // Add test data
+        function addTestData() {
+            if (!debugScriptLoaded) {
+                const results = document.getElementById('test-results');
+                results.innerHTML = '<div class="result warning">⚠️ Load debug script terlebih dahulu</div>';
+                return;
+            }
+
+            if (typeof addTestDataWithDifferentFormats === 'function') {
+                addTestDataWithDifferentFormats();
+                const results = document.getElementById('test-results');
+                results.innerHTML = '<div class="result info">➕ Adding test data with different formats... Check console for details</div>';
+            } else {
+                const results = document.getElementById('test-results');
+                results.innerHTML = '<div class="result error">❌ Debug script not loaded properly</div>';
+            }
+        }
+
+        // Add multiple formats
+        function addMultipleFormats() {
+            if (!firebaseInitialized) {
+                updateStatus('Firebase belum diinisialisasi', 'error');
+                return;
+            }
+
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<div class="info">Menambah data test dengan berbagai format...</div>';
+
+            const formats = [
+                { name: 'ISO', value: new Date().toISOString() },
+                { name: 'Firebase', value: { seconds: Math.floor(Date.now() / 1000), nanoseconds: 0 } },
+                { name: 'Unix', value: Date.now() }
+            ];
+
+            let promises = [];
+            formats.forEach((format, index) => {
+                setTimeout(() => {
+                    const logData = {
+                        timestamp: format.value,
+                        card_id: `test-${format.name}-${Date.now()}`,
+                        status: 'granted'
+                    };
+                    
+                    promises.push(
+                        db.ref('/room1/access_history/access_records').push(logData)
+                            .then(() => {
+                                console.log(`✅ ${format.name} format added`);
+                            })
+                    );
+                }, index * 1000);
+            });
+
+            Promise.all(promises)
+                .then(() => {
+                    results.innerHTML = '<div class="result success">✅ Semua format test berhasil ditambahkan</div>';
+                })
+                .catch((error) => {
+                    results.innerHTML = `<div class="result error">Error: ${error.message}</div>`;
+                });
+        }
+
+        // Clear test data
+        function clearTestData() {
+            if (!firebaseInitialized) {
+                updateStatus('Firebase belum diinisialisasi', 'error');
+                return;
+            }
+
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<div class="info">Menghapus data test...</div>';
+
+            db.ref('/room1/access_history/access_records').remove()
+                .then(() => {
+                    results.innerHTML = '<div class="result success">✅ Data test berhasil dihapus</div>';
+                })
+                .catch((error) => {
+                    results.innerHTML = `<div class="result error">Error: ${error.message}</div>`;
+                });
+        }
+
+        // Test dashboard function
+        function testDashboardFunction() {
+            const results = document.getElementById('function-test-results');
+            results.innerHTML = '<div class="info">Testing dashboard formatTimestamp function...</div>';
+
+            // Test cases
+            const testCases = [
+                { name: "ISO String", value: "2024-01-15T10:30:00.000Z" },
+                { name: "Firebase Timestamp", value: { seconds: 1705312200, nanoseconds: 0 } },
+                { name: "Unix Timestamp", value: 1705312200000 },
+                { name: "Invalid String", value: "invalid-date" }
+            ];
+
+            let output = '';
+            testCases.forEach(test => {
+                try {
+                    if (typeof formatTimestamp === 'function') {
+                        const result = formatTimestamp(test.value);
+                        const isValid = result !== "Waktu tidak valid" && result !== "Waktu tidak tersedia" && result !== "Error parsing waktu";
+                        const className = isValid ? 'success' : 'error';
+                        
+                        output += `<div class="result ${className}">
+<strong>${test.name}:</strong> ${result}
+Input: ${JSON.stringify(test.value)}
+</div>`;
+                    } else {
+                        output += `<div class="result error">
+<strong>${test.name}:</strong> formatTimestamp function not available
+Input: ${JSON.stringify(test.value)}
+</div>`;
+                    }
+                } catch (error) {
+                    output += `<div class="result error">
+<strong>${test.name}:</strong> Error: ${error.message}
+Input: ${JSON.stringify(test.value)}
+</div>`;
+                }
+            });
+            
+            results.innerHTML = output;
+        }
+
+        // Update status
+        function updateStatus(message, type) {
+            const statusDiv = document.getElementById('firebase-status');
+            statusDiv.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+
+        // Clear console
+        function clearConsole() {
+            console.clear();
+            alert('Console telah dibersihkan!');
+        }
+
+        // Auto-initialize Firebase on load
+        window.onload = function() {
+            console.log("🚀 Debug Dashboard Tool Loaded");
+            initFirebase();
+        };
+    </script>
+</body>
+</html> 

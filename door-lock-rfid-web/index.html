@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monitoring Ruang Kelas</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <style>
+    body.fade-out {
+      animation: fadeOut 0.5s forwards;
+    }
+    @keyframes fadeOut {
+      to { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <form id="login-form" class="login-box">
+      <h2>Sign In</h2>
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+      <div class="options">
+        <a href="#">Forget Password?</a>
+        <a href="#">Signup</a>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAbJXnRwSGreNGDtP9L7fHx6WUwncMYA9M",
+      authDomain: "monitoring-ruang-kelas.firebaseapp.com",
+      databaseURL: "https://monitoring-ruang-kelas-default-rtdb.firebaseio.com",
+      projectId: "monitoring-ruang-kelas",
+      storageBucket: "monitoring-ruang-kelas.firebasestorage.app",
+      messagingSenderId: "811142630328",
+      appId: "1:811142630328:web:2be668fbe63c372c1a5d4d",
+      measurementId: "G-GTE9ZMV222"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        // Login dengan Firebase Authentication
+        await firebase.auth().signInWithEmailAndPassword(email, password);
+        document.body.classList.add('fade-out');
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 500);
+      } catch (error) {
+        alert('Login gagal: ' + error.message);
+      }
+    });
+  </script>
+</body>
+</html>

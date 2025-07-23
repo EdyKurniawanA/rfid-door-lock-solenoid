@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Timestamp - Debug Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 12px;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        .info {
+            background: #e2e3e5;
+            color: #383d41;
+            font-size: 12px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .firebase-config {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .instructions {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .instructions h4 {
+            margin-top: 0;
+            color: #0c5460;
+        }
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Test Timestamp Debug Tool</h1>
+        <p>Tool untuk debug masalah "Waktu tidak valid" di dashboard</p>
+
+        <div class="instructions">
+            <h4>📋 Cara Menggunakan:</h4>
+            <ol>
+                <li><strong>Buka Developer Tools (F12)</strong> dan lihat tab Console</li>
+                <li><strong>Test format timestamp</strong> dengan tombol di bawah</li>
+                <li><strong>Lihat data real dari Firebase</strong> untuk analisis</li>
+                <li><strong>Tambahkan data test</strong> dengan format yang benar</li>
+                <li><strong>Analisis debug output</strong> di console</li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h3>🔥 Firebase Connection</h3>
+            <div class="firebase-config">
+                <strong>Firebase Config:</strong><br>
+                Project: monitoring-ruang-kelas<br>
+                Database: https://monitoring-ruang-kelas-default-rtdb.firebaseio.com
+            </div>
+            <button onclick="initFirebase()">Initialize Firebase</button>
+            <button onclick="testConnection()">Test Connection</button>
+            <div id="firebase-status"></div>
+        </div>
+
+        <div class="section">
+            <h3>📊 Test Format Timestamp</h3>
+            <button onclick="testAllFormats()">Test Semua Format</button>
+            <button onclick="testFirebaseFormats()">Test Firebase Formats</button>
+            <div id="format-results"></div>
+        </div>
+
+        <div class="section">
+            <h3>📋 Data Real dari Firebase</h3>
+            <button onclick="viewRealLogs()">Lihat Log Real</button>
+            <button onclick="analyzeTimestamps()">Analisis Timestamp</button>
+            <div id="real-data-results"></div>
+        </div>
+
+        <div class="section">
+            <h3>➕ Tambah Data Test</h3>
+            <button onclick="addTestData()">Tambah Data Test</button>
+            <button onclick="addMultipleFormats()">Tambah Multiple Format</button>
+            <button onclick="clearTestData()">Hapus Data Test</button>
+            <div id="test-data-results"></div>
+        </div>
+
+        <div class="section">
+            <h3>🔧 Custom Test</h3>
+            <input type="text" id="custom-timestamp" placeholder="Masukkan timestamp custom (JSON atau string)">
+            <button onclick="testCustom()">Test Custom Timestamp</button>
+            <div id="custom-results"></div>
+        </div>
+
+        <div class="section">
+            <h3>📋 Console Log</h3>
+            <button onclick="clearConsole()">Clear Console</button>
+            <p><em>Buka Developer Tools (F12) dan lihat tab Console untuk debug info lengkap</em></p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        let db = null;
+        let firebaseInitialized = false;
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbJXnRwSGreNGDtP9L7fHx6WUwncMYA9M",
+            authDomain: "monitoring-ruang-kelas.firebaseapp.com",
+            databaseURL: "https://monitoring-ruang-kelas-default-rtdb.firebaseio.com",
+            projectId: "monitoring-ruang-kelas",
+            storageBucket: "monitoring-ruang-kelas.firebasestorage.app",
+            messagingSenderId: "811142630328",
+            appId: "1:811142630328:web:2be668fbe63c372c1a5d4d",
+            measurementId: "G-GTE9ZMV222"
+        };
+
+        // Initialize Firebase
+        function initFirebase() {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                firebaseInitialized = true;
+                updateStatus('Firebase berhasil diinisialisasi', 'success');
+                console.log('✅ Firebase initialized successfully');
+            } catch (error) {
+                updateStatus('Error inisialisasi Firebase: ' + error.message, 'error');
+                console.error('❌ Firebase initialization error:', error);
+            }
+        }
+
+        // Test Firebase connection
+        function testConnection() {
+            if (!firebaseInitialized) {
+                updateStatus('Firebase belum diinisialisasi', 'error');
+                return;
+            }
+
+            db.ref('.info/connected').once('value')
+                .then((snapshot) => {
+                    if (snapshot.val()) {
+                        updateStatus('✅ Terhubung ke Firebase', 'success');
+                    } else {
+                        updateStatus('❌ Tidak terhubung ke Firebase', 'error');
+                    }
+                })
+                .catch((error) => {
+                    updateStatus('❌ Error koneksi: ' + error.message, 'error');
+                });
+        }
+
+        // Copy fungsi formatTimestamp dari dashboard.js dengan error handling yang aman
+        function formatTimestamp(timestamp) {
+            console.log("=".repeat(50));
+            console.log("🔍 DEBUG TIMESTAMP START");
+            
+            if (!timestamp) {
+                console.log("❌ Timestamp kosong:", timestamp);
+                console.log("🔍 DEBUG TIMESTAMP END");
+                console.log("=".repeat(50));
+                return "Waktu tidak tersedia";
+            }
+
+            let date;
+            
+            // Debug: tampilkan timestamp asli dengan detail lengkap
+            console.log("🔍 Timestamp asli:", timestamp);
+            console.log("📊 Tipe data:", typeof timestamp);
+            console.log("📋 Is Object:", typeof timestamp === 'object');
+            console.log("📋 Is Array:", Array.isArray(timestamp));
+            console.log("🔧 JSON stringify:", JSON.stringify(timestamp));
+            console.log("🔧 JSON stringify (2):", JSON.stringify(timestamp, null, 2));
+            
+            // Coba berbagai format timestamp dengan error handling
+            try {
+                if (typeof timestamp === 'string') {
+                    console.log("📝 Parsing sebagai string...");
+                    date = new Date(timestamp);
+                    console.log("   String parsed:", date);
+                } else if (typeof timestamp === 'number') {
+                    console.log("🔢 Parsing sebagai number (Unix timestamp)...");
+                    date = new Date(timestamp);
+                    console.log("   Number parsed:", date);
+                } else if (timestamp && timestamp.seconds !== undefined) {
+                    console.log("🔥 Parsing sebagai Firebase Timestamp object...");
+                    console.log("   Seconds:", timestamp.seconds);
+                    console.log("   Nanoseconds:", timestamp.nanoseconds);
+                    date = new Date(timestamp.seconds * 1000);
+                    console.log("   Firebase timestamp parsed:", date);
+                } else if (timestamp && timestamp._seconds !== undefined) {
+                    console.log("🔥 Parsing sebagai Firebase Timestamp dengan _seconds...");
+                    console.log("   _seconds:", timestamp._seconds);
+                    console.log("   _nanoseconds:", timestamp._nanoseconds);
+                    date = new Date(timestamp._seconds * 1000);
+                    console.log("   Firebase _seconds parsed:", date);
+                } else if (timestamp && typeof timestamp.toDate === 'function') {
+                    console.log("📅 Parsing sebagai Firestore Timestamp...");
+                    date = timestamp.toDate();
+                    console.log("   Firestore timestamp parsed:", date);
+                } else if (timestamp && timestamp.val) {
+                    console.log("📦 Parsing sebagai Firebase snapshot...");
+                    const val = timestamp.val();
+                    console.log("   Snapshot value:", val);
+                    if (val && typeof val === 'object') {
+                        date = new Date(val.seconds * 1000);
+                    } else {
+                        date = new Date(val);
+                    }
+                    console.log("   Snapshot parsed:", date);
+                } else {
+                    console.log("❓ Mencoba parse sebagai Date object...");
+                    date = new Date(timestamp);
+                    console.log("   Generic parsed:", date);
+                }
+            } catch (error) {
+                console.log("❌ Error saat parsing:", error);
+                console.log("🔍 DEBUG TIMESTAMP END");
+                console.log("=".repeat(50));
+                return "Error parsing waktu";
+            }
+
+            // Cek apakah date valid dengan detail dan error handling untuk toISOString
+            console.log("📅 Date object hasil parsing:", date);
+            console.log("📅 Date.getTime():", date.getTime());
+            
+            // Safe toISOString dengan error handling
+            let isoString = "Invalid Date";
+            try {
+                isoString = date.toISOString();
+                console.log("📅 Date.toISOString():", isoString);
+            } catch (error) {
+                console.log("❌ Error saat toISOString():", error.message);
+                console.log("   Date object:", date);
+                console.log("   getTime():", date.getTime());
+            }
+            
+            console.log("📅 Is NaN:", isNaN(date.getTime()));
+            
+            if (isNaN(date.getTime())) {
+                console.log("❌ Timestamp tidak valid setelah parsing");
+                console.log("   Date object:", date);
+                console.log("   getTime():", date.getTime());
+                console.log("   toString():", date.toString());
+                
+                // Coba alternatif parsing
+                console.log("🔄 Mencoba alternatif parsing...");
+                
+                // Coba parse sebagai string jika object
+                if (typeof timestamp === 'object' && timestamp !== null) {
+                    try {
+                        const timestampStr = JSON.stringify(timestamp);
+                        console.log("   Mencoba parse JSON string:", timestampStr);
+                        date = new Date(timestampStr);
+                        console.log("   Alternatif parsing result:", date);
+                        console.log("   Is valid:", !isNaN(date.getTime()));
+                        
+                        // Test toISOString lagi
+                        try {
+                            const newIsoString = date.toISOString();
+                            console.log("   New toISOString():", newIsoString);
+                        } catch (e) {
+                            console.log("   New toISOString() error:", e.message);
+                        }
+                    } catch (e) {
+                        console.log("   Alternatif parsing failed:", e);
+                    }
+                }
+                
+                // Jika masih tidak valid
+                if (isNaN(date.getTime())) {
+                    console.log("🔍 DEBUG TIMESTAMP END");
+                    console.log("=".repeat(50));
+                    return "Waktu tidak valid";
+                }
+            }
+
+            console.log("✅ Timestamp berhasil diparse:", date);
+            
+            // Safe toISOString untuk final check
+            try {
+                const finalIsoString = date.toISOString();
+                console.log("📅 Final Date object:", finalIsoString);
+            } catch (error) {
+                console.log("❌ Final toISOString error:", error.message);
+                console.log("🔍 DEBUG TIMESTAMP END");
+                console.log("=".repeat(50));
+                return "Waktu tidak valid";
+            }
+
+            // Format ke bahasa Indonesia dengan error handling
+            let formattedDate;
+            try {
+                formattedDate = date.toLocaleString('id-ID', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+            } catch (error) {
+                console.log("❌ Error saat format locale:", error.message);
+                // Fallback ke format sederhana
+                try {
+                    formattedDate = date.toString();
+                } catch (e) {
+                    formattedDate = "Waktu tidak valid";
+                }
+            }
+            
+            console.log("🎯 Hasil format:", formattedDate);
+            console.log("🔍 DEBUG TIMESTAMP END");
+            console.log("=".repeat(50));
+            return formattedDate;
+        }
+
+        // Test semua format timestamp
+        function testAllFormats() {
+            const results = document.getElementById('format-results');
+            results.innerHTML = '<div class="info">Testing berbagai format timestamp...</div>';
+            
+            const testCases = [
+                { name: "ISO String", value: "2024-01-15T10:30:00.000Z" },
+                { name: "Unix Timestamp (seconds)", value: 1705312200 },
+                { name: "Unix Timestamp (milliseconds)", value: 1705312200000 },
+                { name: "Date String", value: "2024-01-15 10:30:00" },
+                { name: "Firebase Timestamp Object", value: { seconds: 1705312200, nanoseconds: 0 } },
+                { name: "Firebase Timestamp with _seconds", value: { _seconds: 1705312200, _nanoseconds: 0 } },
+                { name: "Invalid String", value: "invalid-date" },
+                { name: "Null", value: null },
+                { name: "Undefined", value: undefined },
+                { name: "Empty String", value: "" }
+            ];
+
+            let output = '';
+            testCases.forEach(test => {
+                try {
+                    const result = formatTimestamp(test.value);
+                    const isValid = result !== "Waktu tidak valid" && result !== "Waktu tidak tersedia" && result !== "Error parsing waktu";
+                    const className = isValid ? 'success' : 'error';
+                    
+                    output += `<div class="result ${className}">
+<strong>${test.name}:</strong> ${result}
+Input: ${JSON.stringify(test.value)}
+</div>`;
+                } catch (error) {
+                    output += `<div class="result error">
+<strong>${test.name}:</strong> Error: ${error.message}
+Input: ${JSON.stringify(test.value)}
+</div>`;
+                }
+            });
+            
+            results.innerHTML = output;
+        }
+
+        // Test Firebase format timestamp
+        function testFirebaseFormats() {
+            const results = document.getElementById('format-results');
+            results.innerHTML = '<div class="info">Testing Firebase timestamp formats...</div>';
+            
+            const now = Math.floor(Date.now() / 1000);
+            const testCases = [
+                { name: "Current Firebase Timestamp", value: { seconds: now, nanoseconds: 0 } },
+                { name: "Firebase Timestamp with _seconds", value: { _seconds: now, _nanoseconds: 0 } },
+                { name: "Firebase Timestamp (string seconds)", value: { seconds: now.toString(), nanoseconds: 0 } },
+                { name: "Firebase Timestamp (mixed types)", value: { seconds: now, nanoseconds: "0" } }
+            ];
+
+            let output = '';
+            testCases.forEach(test => {
+                try {
+                    const result = formatTimestamp(test.value);
+                    const isValid = result !== "Waktu tidak valid" && result !== "Waktu tidak tersedia" && result !== "Error parsing waktu";
+                    const className = isValid ? 'success' : 'error';
+                    
+                    output += `<div class="result ${className}">
+<strong>${test.name}:</strong> ${result}
+Input: ${JSON.stringify(test.value)}
+</div>`;
+                } catch (error) {
+                    output += `<div class="result error">
+<strong>${test.name}:</strong> Error: ${error.message}
+Input: ${JSON.stringify(test.value)}
+</div>`;
+                }
+            });
+            
+            results.innerHTML = output;
+        }
+
+        // Lihat log real dari Firebase
+        function viewRealLogs() {
+            if (!firebaseInitialized) {
+                updateStatus('Firebase belum diinisialisasi', 'error');
+                return;
+            }
+
+            const results = document.getElementById('real-data-results');
+            results.innerHTML = '<div class="info">Mengambil data real dari Firebase...</div>';
+
+            db.ref('/room1/access_history/access_records').once('value')
+                .then((snapshot) => {
+                    const logs = snapshot.val();
+                    let output = '<div class="info">Data real dari Firebase:</div>';
+                    
+                    if (!logs) {
+                        output += '<div class="result info">Tidak ada log di room1</div>';
+                    } else {
+                        Object.keys(logs).forEach((key, index) => {
+                            try {
+                                const log = logs[key];
+                                const result = formatTimestamp(log.timestamp);
+                                const isValid = result !== "Waktu tidak valid" && result !== "Waktu tidak tersedia" && result !== "Error parsing waktu";
+                                const className = isValid ? 'success' : 'error';
+                                
+                                output += `<div class="result ${className}">
+<strong>Log ${index + 1} (${key}):</strong> ${result}
+Timestamp: ${JSON.stringify(log.timestamp)}
+Type: ${typeof log.timestamp}
+Card ID: ${log.card_id}
+Status: ${log.status}
+</div>`;
+                            } catch (error) {
+                                output += `<div class="result error">
+<strong>Log ${index + 1} (${key}):</strong> Error: ${error.message}
+Timestamp: ${JSON.stringify(logs[key].timestamp)}
+</div>`;
+                            }
+                        });
+                    }
+                    
+                    results.innerHTML = output;
+                })
+                .catch((error) => {
+                    results.innerHTML = `<div class="result error">Error: ${error.message}</div>`;
+                });
+        }
+
+        // Analisis timestamp dari data real
+        function analyzeTimestamps() {
+            if (!firebaseInitialized) {
+                updateStatus('Firebase belum diinisialisasi', 'error');
+                return;
+            }
+
+            const results = document.getElementById('real-data-results');
+            results.innerHTML = '<div class="info">Menganalisis timestamp dari data real...</div>';
+
+            db.ref('/room1/access_history/access_records').once('value')
+                .then((snapshot) => {
+                    const logs = snapshot.val();
+                    let output = '<div class="info">Analisis Timestamp:</div>';
+                    
+                    if (!logs) {
+                        output += '<div class="result info">Tidak ada data untuk dianalisis</div>';
+                    } else {
+                        const timestampTypes = {};
+                        const invalidTimestamps = [];
+                        
+                        Object.keys(logs).forEach((key) => {
+                            try {
+                                const log = logs[key];
+                                const timestamp = log.timestamp;
+                                const type = typeof timestamp;
+                                
+                                if (!timestampTypes[type]) {
+                                    timestampTypes[type] = [];
+                                }
+                                timestampTypes[type].push(timestamp);
+                                
+                                // Test format timestamp
+                                const result = formatTimestamp(timestamp);
+                                if (result === "Waktu tidak valid" || result === "Waktu tidak tersedia" || result === "Error parsing waktu") {
+                                    invalidTimestamps.push({
+                                        key: key,
+                                        timestamp: timestamp,
+                                        type: type,
+                                        result: result
+                                    });
+                                }
+                            } catch (error) {
+                                invalidTimestamps.push({
+                                    key: key,
+                                    timestamp: logs[key].timestamp,
+                                    type: typeof logs[key].timestamp,
+                                    result: `Error: ${error.message}`
+                                });
+                            }
+                        });
+                        
+                        // Tampilkan analisis
+                        output += '<div class="result info"><strong>Jenis Timestamp yang Ditemukan:</strong></div>';
+                        Object.keys(timestampTypes).forEach(type => {
+                            output += `<div class="result info">${type}: ${timestampTypes[type].length} item</div>`;
+                        });
+                        
+                        if (invalidTimestamps.length > 0) {
+                            output += '<div class="result error"><strong>Timestamp Bermasalah:</strong></div>';
+                            invalidTimestamps.forEach(item => {
+                                output += `<div class="result error">
+Key: ${item.key}
+Timestamp: ${JSON.stringify(item.timestamp)}
+Type: ${item.type}
+Result: ${item.result}
+</div>`;
+                            });
+                        } else {
+                            output += '<div class="result success">✅ Semua timestamp valid!</div>';
+                        }
+                    }
+                    
+                    results.innerHTML = output;
+                })
+                .catch((error) => {
+                    results.innerHTML = `<div class="result error">Error: ${error.message}</div>`;
+                });
+        }
+
+        // Tambah data test
+        function addTestData() {
+            if (!firebaseInitialized) {
+                updateStatus('Firebase belum diinisialisasi', 'error');
+                return;
+            }
+
+            const results = document.getElementById('test-data-results');
+            results.innerHTML = '<div class="info">Menambah data test...</div>';
+
+            const timestamp = new Date().toISOString();
+            const logData = {
+                timestamp: timestamp,
+                card_id: 'test-card-' + Date.now(),
+                status: 'granted'
+            };
+
+            db.ref('/room1/access_history/access_records').push(logData)
+                .then(() => {
+                    results.innerHTML = '<div class="result success">✅ Data test berhasil ditambahkan dengan timestamp ISO</div>';
+                })
+                .catch((error) => {
+                    results.innerHTML = `<div class="result error">Error: ${error.message}</div>`;
+                });
+        }
+
+        // Tambah multiple format
+        function addMultipleFormats() {
+            if (!firebaseInitialized) {
+                updateStatus('Firebase belum diinisialisasi', 'error');
+                return;
+            }
+
+            const results = document.getElementById('test-data-results');
+            results.innerHTML = '<div class="info">Menambah data test dengan berbagai format...</div>';
+
+            const formats = [
+                { name: 'ISO', value: new Date().toISOString() },
+                { name: 'Firebase', value: { seconds: Math.floor(Date.now() / 1000), nanoseconds: 0 } },
+                { name: 'Unix', value: Date.now() }
+            ];
+
+            let promises = [];
+            formats.forEach((format, index) => {
+                setTimeout(() => {
+                    const logData = {
+                        timestamp: format.value,
+                        card_id: `test-${format.name}-${Date.now()}`,
+                        status: 'granted'
+                    };
+                    
+                    promises.push(
+                        db.ref('/room1/access_history/access_records').push(logData)
+                            .then(() => {
+                                console.log(`✅ ${format.name} format added`);
+                            })
+                    );
+                }, index * 1000);
+            });
+
+            Promise.all(promises)
+                .then(() => {
+                    results.innerHTML = '<div class="result success">✅ Semua format test berhasil ditambahkan</div>';
+                })
+                .catch((error) => {
+                    results.innerHTML = `<div class="result error">Error: ${error.message}</div>`;
+                });
+        }
+
+        // Hapus data test
+        function clearTestData() {
+            if (!firebaseInitialized) {
+                updateStatus('Firebase belum diinisialisasi', 'error');
+                return;
+            }
+
+            const results = document.getElementById('test-data-results');
+            results.innerHTML = '<div class="info">Menghapus data test...</div>';
+
+            db.ref('/room1/access_history/access_records').remove()
+                .then(() => {
+                    results.innerHTML = '<div class="result success">✅ Data test berhasil dihapus</div>';
+                })
+                .catch((error) => {
+                    results.innerHTML = `<div class="result error">Error: ${error.message}</div>`;
+                });
+        }
+
+        // Test custom timestamp
+        function testCustom() {
+            const input = document.getElementById('custom-timestamp').value;
+            const results = document.getElementById('custom-results');
+            
+            if (!input.trim()) {
+                results.innerHTML = '<div class="result error">Masukkan timestamp untuk ditest</div>';
+                return;
+            }
+            
+            results.innerHTML = '<div class="info">Testing custom timestamp...</div>';
+            
+            let parsedInput;
+            try {
+                parsedInput = JSON.parse(input);
+            } catch (e) {
+                parsedInput = input;
+            }
+            
+            try {
+                const result = formatTimestamp(parsedInput);
+                const isValid = result !== "Waktu tidak valid" && result !== "Waktu tidak tersedia" && result !== "Error parsing waktu";
+                const className = isValid ? 'success' : 'error';
+                
+                results.innerHTML = `<div class="result ${className}">
+<strong>Custom Timestamp:</strong> ${result}
+Input: ${JSON.stringify(parsedInput)}
+Type: ${typeof parsedInput}
+</div>`;
+            } catch (error) {
+                results.innerHTML = `<div class="result error">
+<strong>Custom Timestamp:</strong> Error: ${error.message}
+Input: ${JSON.stringify(parsedInput)}
+Type: ${typeof parsedInput}
+</div>`;
+            }
+        }
+
+        // Update status
+        function updateStatus(message, type) {
+            const statusDiv = document.getElementById('firebase-status');
+            statusDiv.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+
+        // Clear console
+        function clearConsole() {
+            console.clear();
+            alert('Console telah dibersihkan!');
+        }
+
+        // Auto-initialize Firebase on load
+        window.onload = function() {
+            console.log("🚀 Test Timestamp Debug Tool Loaded");
+            initFirebase();
+        };
+    </script>
+</body>
+</html> 

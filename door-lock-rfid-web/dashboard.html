@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard Monitoring Ruangan</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    .card-item { color: #222 !important; font-size: 16px !important; }
+  </style>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="logo">Monitoring Ruang</div>
+    <div class="current-time" id="current-time">
+      <i class="fas fa-clock"></i>
+      <span id="time-display">Loading...</span>
+    </div>
+    <button id="btn-logout">Logout</button>
+  </header>
+
+  <main>
+    <section class="room-cards" id="room-cards">
+      <!-- Kartu ruangan muncul di sini -->
+    </section>
+
+    <!-- Modal detail ruangan -->
+    <div id="modal-detail" class="modal">
+      <div class="modal-content">
+        <span id="close-modal" class="close-btn">&times;</span>
+        <h3 id="modal-ruang-name"></h3>
+        <div class="modal-info">
+        <p><strong>Dosen:</strong> <span id="modal-dosen"></span></p>
+        <p id="modal-status-ruangan"></p>
+        <p><strong>Waktu:</strong> <span id="modal-waktu"></span></p>
+        <p><strong>Status PIR:</strong> <span id="modal-pir-status"></span></p>
+        <p><strong>Status Pintu:</strong> <span id="modal-door-status"></span></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Reschedule Roster -->
+    <div id="modal-reschedule" class="modal">
+      <div class="modal-content">
+        <span id="close-reschedule-modal" class="close-btn">&times;</span>
+        <h3>Lab Elektronika Digital</h3>
+        <form id="reschedule-form">
+          <label>Hari:
+            <input type="text" id="reschedule-hari" required>
+          </label>
+          <label>Mulai:
+            <input type="time" id="reschedule-mulai" required>
+          </label>
+          <label>Selesai:
+            <input type="time" id="reschedule-selesai" required>
+          </label>
+          <label>Mata Kuliah:
+            <input type="text" id="reschedule-matkul" required>
+          </label>
+          <label>Kelas:
+            <input type="text" id="reschedule-kelas" required>
+          </label>
+          <label>Dosen:
+            <input type="text" id="reschedule-dosen" required>
+          </label>
+          <input type="hidden" id="reschedule-id">
+          <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+        </form>
+      </div>
+    </div>
+
+    <section class="roster-section">
+      <h3>Jadwal Ruangan</h3>
+      <!-- Form Tambah Jadwal Baru -->
+      <div style="margin-bottom:8px; color:#333333; font-size:14px; background:#f8f9fa; border-radius:8px; padding:10px 16px;">
+        <strong>Tambah Jadwal Baru:</strong> Silakan isi <b>Hari</b> (misal: Senin), <b>Jam Mulai</b>, <b>Jam Selesai</b>, dan <b>Nama Dosen</b> sesuai jadwal yang ingin ditambahkan. Pilih ruangan terlebih dahulu sebelum menambah jadwal.
+      </div>
+      <div class="add-roster-form" style="background:#fff; border-radius:10px; padding:16px; margin-bottom:18px; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+        <form id="add-roster-form" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <input type="text" id="add-hari" placeholder="Hari (cth: Senin)" required style="flex:1; min-width:90px;" title="Masukkan nama hari, misal: Senin">
+          <input type="time" id="add-mulai" placeholder="Jam Mulai" required style="flex:1; min-width:90px;" title="Masukkan jam mulai, format 24 jam">
+          <input type="time" id="add-selesai" placeholder="Jam Selesai" required style="flex:1; min-width:90px;" title="Masukkan jam selesai, format 24 jam">
+          <input type="text" id="add-matkul" placeholder="Mata Kuliah (cth: Sistem Kendali)" required style="flex:2; min-width:120px;" title="Masukkan nama mata kuliah">
+          <input type="text" id="add-kelas" placeholder="Kelas (cth: TI-3A)" required style="flex:1; min-width:90px;" title="Masukkan nama kelas">
+          <input type="text" id="add-dosen" placeholder="Nama Dosen (cth: Dr. Budi)" required style="flex:2; min-width:120px;" title="Masukkan nama dosen pengampu">
+          <input type="text" id="add-dosen-id" placeholder="ID Akses Dosen (cth: 5e487e00)" required style="flex:2; min-width:120px;" title="Masukkan ID kartu RFID dosen">
+          <button type="submit" class="btn btn-primary" style="flex:0;">Tambah Jadwal</button>
+        </form>
+      </div>
+      <!-- Roster Controls -->
+      <div class="roster-controls">
+        <div class="roster-controls-row">
+          <div class="roster-filter-group">
+            <label for="select-room">Pilih Ruangan</label>
+            <select id="select-room">
+              <option value="">Pilih Ruangan</option>
+            </select>
+          </div>
+          <div class="roster-stats">
+            <div class="roster-count">
+              Total Jadwal: <span id="roster-count">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Roster Container -->
+      <div class="roster-container">
+        <table class="roster-table" id="roster-table">
+          <thead>
+            <tr>
+              <th>Hari</th>
+              <th>Mulai</th>
+              <th>Selesai</th>
+              <th>Mata Kuliah</th>
+              <th>Kelas</th>
+              <th>Dosen</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Roster data will be populated here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="access-log-section">
+      <h3>Log Akses Ruangan</h3>
+      
+      <!-- Log Controls -->
+      <div class="log-controls">
+        <div class="log-controls-row">
+          <div class="log-filter-group">
+            <label for="log-room-select">Filter Ruangan</label>
+            <select id="log-room-select">
+              <option value="all">Semua Ruangan</option>
+            </select>
+          </div>
+          
+          <div class="log-stats">
+            <div class="log-count">
+              Total: <span id="log-count">0</span> log
+            </div>
+            <button id="refresh-log" class="btn-refresh">
+              🔄 Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Log Container -->
+      <div class="log-container">
+        <div id="log-table">
+          <!-- Log items will be populated here -->
+        </div>
+      </div>
+    </section>
+
+    <section id="card-management-section">
+      <h2>Manajemen Kartu RFID</h2>
+      <div class="card-management">
+        <h3>Manajemen Kartu RFID</h3>
+        
+        <!-- Notifikasi kartu yang belum terdaftar -->
+        <div id="unregistered-notification" class="notification warning" style="display: none;">
+          <span>⚠️ Kartu yang belum terdaftar: <span id="unregistered-cards"></span></span>
+        </div>
+        
+        <!-- Card Counter -->
+        <div class="card-counter">
+          Total Kartu: <span id="card-count">0</span>
+        </div>
+        
+        <!-- Add Card Form -->
+        <div class="card-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="card-id">ID Kartu RFID</label>
+              <input type="text" id="card-id" placeholder="Masukkan ID kartu RFID" maxlength="20">
+            </div>
+            <div class="form-group">
+              <label for="card-name">Nama Pemilik</label>
+              <input type="text" id="card-name" placeholder="Masukkan nama pemilik kartu" maxlength="50">
+            </div>
+            <button class="btn btn-primary" onclick="addCard()">
+              <span>➕ Tambah Kartu</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Search Cards -->
+        <div class="card-search">
+          <input type="text" id="card-search" placeholder="Cari kartu berdasarkan ID atau nama..." onkeyup="filterCards()">
+        </div>
+        
+        <!-- Card List -->
+        <div class="card-list">
+          <h4>Daftar Kartu RFID</h4>
+          <div id="card-list-container">
+            <!-- Cards will be populated here -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAbJXnRwSGreNGDtP9L7fHx6WUwncMYA9M",
+      authDomain: "monitoring-ruang-kelas.firebaseapp.com",
+      databaseURL: "https://monitoring-ruang-kelas-default-rtdb.firebaseio.com",
+      projectId: "monitoring-ruang-kelas",
+      storageBucket: "monitoring-ruang-kelas.firebasestorage.app",
+      messagingSenderId: "811142630328",
+      appId: "1:811142630328:web:2be668fbe63c372c1a5d4d",
+      measurementId: "G-GTE9ZMV222"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    function openRescheduleModal(room, jadwalId, jadwal) {
+      document.getElementById('reschedule-id').value = jadwalId;
+      document.getElementById('reschedule-hari').value = jadwal.day || '';
+      document.getElementById('reschedule-mulai').value = jadwal.start_time || '';
+      document.getElementById('reschedule-selesai').value = jadwal.end_time || '';
+      document.getElementById('reschedule-dosen').value = jadwal.lecturer || '';
+      document.getElementById('modal-reschedule').dataset.room = room;
+      document.getElementById('modal-reschedule').style.display = 'block';
+    }
+
+    document.getElementById('reschedule-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const jadwalId = document.getElementById('reschedule-id').value;
+      const hari = document.getElementById('reschedule-hari').value;
+      const mulai = document.getElementById('reschedule-mulai').value;
+      const selesai = document.getElementById('reschedule-selesai').value;
+      const dosen = document.getElementById('reschedule-dosen').value;
+      const room = document.getElementById('modal-reschedule').dataset.room;
+      if (!room) {
+        alert('Ruangan tidak ditemukan!');
+        return;
+      }
+      const schedule = roomsData[room].schedule || [];
+      const scheduleArray = Array.isArray(schedule) ? schedule : Object.values(schedule);
+      const index = scheduleArray.findIndex(j => j.id == jadwalId);
+      if (index === -1) {
+        alert('Jadwal tidak ditemukan!');
+        return;
+      }
+      scheduleArray[index] = {
+        ...scheduleArray[index],
+        day: hari,
+        start_time: mulai,
+        end_time: selesai,
+        lecturer: dosen
+      };
+      firebase.database().ref(`${room}/schedule`).set(scheduleArray)
+        .then(() => {
+          alert('Jadwal berhasil diubah!');
+          document.getElementById('modal-reschedule').style.display = 'none';
+          updateRosterTable(room);
+        }).catch((error) => {
+          alert('Gagal mengubah jadwal: ' + error.message);
+        });
+    });
+
+    document.getElementById('close-reschedule-modal').onclick = function() {
+      document.getElementById('modal-reschedule').style.display = 'none';
+    };
+
+    // Tambah Jadwal Baru
+    document.getElementById('add-roster-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const hari = document.getElementById('add-hari').value;
+      const mulai = document.getElementById('add-mulai').value;
+      const selesai = document.getElementById('add-selesai').value;
+      const matkul = document.getElementById('add-matkul').value; // ambil mata kuliah
+      const kelas = document.getElementById('add-kelas').value;   // ambil kelas
+      const dosen = document.getElementById('add-dosen').value;
+      const dosenId = document.getElementById('add-dosen-id').value;
+      const room = document.getElementById('select-room').value;
+      if (!room) {
+        alert('Pilih ruangan terlebih dahulu!');
+        return;
+      }
+      // Ambil jadwal lama
+      const schedule = roomsData[room].schedule || [];
+      const scheduleArray = Array.isArray(schedule) ? schedule : Object.values(schedule);
+      // Tambahkan jadwal baru dengan id unik
+      scheduleArray.push({
+        id: Date.now() + Math.random(),
+        day: hari,
+        start_time: mulai,
+        end_time: selesai,
+        matkul: matkul, // simpan mata kuliah
+        kelas: kelas,   // simpan kelas
+        lecturer: dosen,
+        card_id: dosenId
+      });
+      // Update ke Firebase
+      firebase.database().ref(`${room}/schedule`).set(scheduleArray)
+        .then(() => {
+          alert('Jadwal berhasil ditambahkan!');
+          document.getElementById('add-roster-form').reset();
+          updateRosterTable(room);
+        }).catch((error) => {
+          alert('Gagal menambah jadwal: ' + error.message);
+        });
+    });
+
+    function addCard() {
+      const cardId = document.getElementById('card-id').value.trim();
+      const cardName = document.getElementById('card-name').value.trim();
+      if (!cardId || !cardName) {
+        alert('Mohon isi ID kartu dan nama pemilik');
+        return;
+      }
+      // Cek apakah /card_mapping sudah ada
+      firebase.database().ref('/card_mapping').once('value').then(snapshot => {
+        let mapping = snapshot.val() || {};
+        mapping[cardId] = cardName;
+        // Tulis mapping baru ke Firebase
+        return firebase.database().ref('/card_mapping').set(mapping);
+      }).then(() => {
+        alert('Kartu berhasil ditambahkan ke card_mapping!');
+        // Reset form
+        document.getElementById('card-id').value = '';
+        document.getElementById('card-name').value = '';
+        document.getElementById('card-id').focus();
+        // Refresh daftar kartu
+        loadCardList();
+      }).catch((error) => {
+        alert('Gagal menambah kartu: ' + error.message);
+      });
+    }
+
+    function getNameFromCardId(cardId) {
+      // Cek apakah ini kartu master
+      const masterName = getMasterCardName(cardId);
+      if (masterName) {
+        return masterName;
+      }
+      // Jika bukan kartu master, gunakan mapping biasa
+      return cardIdToName[cardId] || cardId;
+    }
+
+    // Fungsi untuk menampilkan daftar kartu dari Firebase
+    function loadCardList() {
+      firebase.database().ref('/card_mapping').once('value').then(snapshot => {
+        const mapping = snapshot.val() || {};
+        console.log('mapping:', mapping); // Tambahkan ini
+        const container = document.getElementById('card-list-container');
+        container.innerHTML = '';
+        Object.entries(mapping).forEach(([cardId, cardName]) => {
+          const div = document.createElement('div');
+          div.className = 'card-item';
+          div.textContent = `${cardId} - ${cardName} `;
+          // Tambahkan tombol hapus
+          const btn = document.createElement('button');
+          btn.textContent = 'Hapus';
+          btn.className = 'btn btn-danger btn-small';
+          btn.style.marginLeft = '10px';
+          btn.onclick = function() {
+            if (confirm(`Yakin ingin menghapus kartu ${cardId}?`)) {
+              deleteCard(cardId);
+            }
+          };
+          div.appendChild(btn);
+          container.appendChild(div);
+        });
+        document.getElementById('card-count').textContent = Object.keys(mapping).length;
+      });
+    }
+
+    // Fungsi hapus kartu dari Firebase
+    function deleteCard(cardId) {
+      firebase.database().ref('/card_mapping/' + cardId).remove()
+        .then(() => {
+          alert('Kartu berhasil dihapus!');
+          loadCardList();
+        })
+        .catch((error) => {
+          alert('Gagal menghapus kartu: ' + error.message);
+        });
+    }
+
+    // Panggil saat halaman dimuat
+    window.addEventListener('DOMContentLoaded', loadCardList);
+  </script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

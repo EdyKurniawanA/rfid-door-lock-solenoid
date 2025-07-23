@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inisialisasi Kartu RFID</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+    .button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 10px 5px;
+      font-size: 16px;
+    }
+    .button:hover {
+      background-color: #45a049;
+    }
+    .button.danger {
+      background-color: #f44336;
+    }
+    .button.danger:hover {
+      background-color: #da190b;
+    }
+    .form-group {
+      margin: 15px 0;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .console {
+      background-color: #f8f8f8;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 15px;
+      margin-top: 20px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+  </style>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>🔑 Inisialisasi Kartu RFID</h1>
+    
+    <p>Halaman ini digunakan untuk menginisialisasi mapping ID kartu RFID ke nama pengguna di Firebase database.</p>
+    
+    <div class="form-group">
+      <label for="cardId">ID Kartu RFID:</label>
+      <input type="text" id="cardId" placeholder="Masukkan ID kartu RFID">
+    </div>
+    
+    <div class="form-group">
+      <label for="userName">Nama Pengguna:</label>
+      <input type="text" id="userName" placeholder="Masukkan nama pengguna">
+    </div>
+    
+    <button class="button" onclick="addSingleCard()">Tambah Kartu</button>
+    <button class="button" onclick="initializeCardMapping()">Inisialisasi Data Awal</button>
+    <button class="button" onclick="viewAllCards()">Lihat Semua Kartu</button>
+    <button class="button danger" onclick="clearConsole()">Bersihkan Console</button>
+    
+    <div class="console" id="console"></div>
+  </div>
+
+  <script src="init-card-mapping.js"></script>
+  <script>
+    // Fungsi untuk menambah kartu tunggal
+    function addSingleCard() {
+      const cardId = document.getElementById('cardId').value.trim();
+      const userName = document.getElementById('userName').value.trim();
+      
+      if (!cardId || !userName) {
+        logToConsole('❌ Mohon isi ID kartu dan nama pengguna!');
+        return;
+      }
+      
+      addCard(cardId, userName);
+      
+      // Reset form
+      document.getElementById('cardId').value = '';
+      document.getElementById('userName').value = '';
+    }
+    
+    // Fungsi untuk menampilkan log di console
+    function logToConsole(message) {
+      const console = document.getElementById('console');
+      const timestamp = new Date().toLocaleTimeString();
+      console.textContent += `[${timestamp}] ${message}\n`;
+      console.scrollTop = console.scrollHeight;
+    }
+    
+    // Fungsi untuk membersihkan console
+    function clearConsole() {
+      document.getElementById('console').textContent = '';
+    }
+    
+    // Override console.log untuk menampilkan di halaman
+    const originalLog = console.log;
+    const originalError = console.error;
+    
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      logToConsole('✅ ' + args.join(' '));
+    };
+    
+    console.error = function(...args) {
+      originalError.apply(console, args);
+      logToConsole('❌ ' + args.join(' '));
+    };
+    
+    // Event listener untuk Enter key
+    document.getElementById('cardId').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('userName').focus();
+      }
+    });
+    
+    document.getElementById('userName').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        addSingleCard();
+      }
+    });
+    
+    logToConsole('🚀 Halaman inisialisasi kartu RFID siap!');
+  </script>
+</body>
+</html> 

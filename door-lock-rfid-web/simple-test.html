@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Timestamp Debug</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .test-section h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .result {
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .success {
+      background: #d4edda;
+      color: #155724;
+    }
+    .debug-info {
+      background: #e2e3e5;
+      color: #383d41;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Test Timestamp Debug</h1>
+    <p>Halaman ini untuk menguji berbagai format timestamp yang mungkin diterima dari Firebase.</p>
+
+    <div class="test-section">
+      <h3>📊 Test Format Timestamp</h3>
+      <button onclick="testTimestampFormats()">Test Semua Format</button>
+      <div id="format-results"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>🔥 Test Firebase Timestamp Object</h3>
+      <button onclick="testFirebaseTimestamp()">Test Firebase Timestamp</button>
+      <div id="firebase-results"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>📅 Test Date Object</h3>
+      <button onclick="testDateObject()">Test Date Object</button>
+      <div id="date-results"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>🔧 Test Custom Timestamp</h3>
+      <input type="text" id="custom-timestamp" placeholder="Masukkan timestamp custom" style="width: 300px; padding: 5px;">
+      <button onclick="testCustomTimestamp()">Test Custom</button>
+      <div id="custom-results"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>📋 Log Console</h3>
+      <button onclick="clearConsole()">Clear Console</button>
+      <p>Buka Developer Tools (F12) dan lihat tab Console untuk debug info lengkap.</p>
+    </div>
+  </div>
+
+  <script>
+    // Copy fungsi formatTimestamp dari dashboard.js
+    function formatTimestamp(timestamp) {
+      console.log("=".repeat(50));
+      console.log("🔍 DEBUG TIMESTAMP START");
+      
+      if (!timestamp) {
+        console.log("❌ Timestamp kosong:", timestamp);
+        console.log("🔍 DEBUG TIMESTAMP END");
+        console.log("=".repeat(50));
+        return "Waktu tidak tersedia";
+      }
+
+      let date;
+      
+      // Debug: tampilkan timestamp asli dengan detail lengkap
+      console.log("🔍 Timestamp asli:", timestamp);
+      console.log("📊 Tipe data:", typeof timestamp);
+      console.log("📋 Is Object:", typeof timestamp === 'object');
+      console.log("📋 Is Array:", Array.isArray(timestamp));
+      console.log("🔧 JSON stringify:", JSON.stringify(timestamp));
+      console.log("🔧 JSON stringify (2):", JSON.stringify(timestamp, null, 2));
+      
+      // Coba berbagai format timestamp dengan error handling
+      try {
+        if (typeof timestamp === 'string') {
+          console.log("📝 Parsing sebagai string...");
+          
+          // Cek apakah string hanya berisi waktu (format HH:MM:SS)
+          const timeOnlyRegex = /^(\d{1,2}):(\d{1,2}):(\d{1,2})$/;
+          const timeMatch = timestamp.match(timeOnlyRegex);
+          
+          if (timeMatch) {
+            console.log("🕐 Detected time-only format, adding current date...");
+            const now = new Date();
+            const [hours, minutes, seconds] = timeMatch.slice(1);
+            
+            // Buat tanggal dengan waktu yang diberikan dan tanggal hari ini
+            date = new Date(
+              now.getFullYear(),
+              now.getMonth(),
+              now.getDate(),
+              parseInt(hours),
+              parseInt(minutes),
+              parseInt(seconds)
+            );
+            console.log("   Time-only parsed with current date:", date);
+          } else {
+            // Coba parse sebagai string biasa
+            date = new Date(timestamp);
+            console.log("   String parsed:", date);
+          }
+        } else if (typeof timestamp === 'number') {
+          console.log("🔢 Parsing sebagai number (Unix timestamp)...");
+          date = new Date(timestamp);
+          console.log("   Number parsed:", date);
+        } else if (timestamp && timestamp.seconds !== undefined) {
+          console.log("🔥 Parsing sebagai Firebase Timestamp object...");
+          console.log("   Seconds:", timestamp.seconds);
+          console.log("   Nanoseconds:", timestamp.nanoseconds);
+          date = new Date(timestamp.seconds * 1000);
+          console.log("   Firebase timestamp parsed:", date);
+        } else if (timestamp && timestamp._seconds !== undefined) {
+          console.log("🔥 Parsing sebagai Firebase Timestamp dengan _seconds...");
+          console.log("   _seconds:", timestamp._seconds);
+          console.log("   _nanoseconds:", timestamp._nanoseconds);
+          date = new Date(timestamp._seconds * 1000);
+          console.log("   Firebase _seconds parsed:", date);
+        } else if (timestamp && typeof timestamp.toDate === 'function') {
+          console.log("📅 Parsing sebagai Firestore Timestamp...");
+          date = timestamp.toDate();
+          console.log("   Firestore timestamp parsed:", date);
+        } else if (timestamp && timestamp.val) {
+          console.log("📦 Parsing sebagai Firebase snapshot...");
+          const val = timestamp.val();
+          console.log("   Snapshot value:", val);
+          if (val && typeof val === 'object') {
+            date = new Date(val.seconds * 1000);
+          } else {
+            date = new Date(val);
+          }
+          console.log("   Snapshot parsed:", date);
+        } else {
+          console.log("❓ Mencoba parse sebagai Date object...");
+          date = new Date(timestamp);
+          console.log("   Generic parsed:", date);
+        }
+      } catch (error) {
+        console.log("❌ Error saat parsing:", error);
+        console.log("🔍 DEBUG TIMESTAMP END");
+        console.log("=".repeat(50));
+        return "Error parsing waktu";
+      }
+
+      // Cek apakah date valid dengan detail dan error handling untuk toISOString
+      console.log("📅 Date object hasil parsing:", date);
+      console.log("📅 Date.getTime():", date.getTime());
+      
+      // Safe toISOString dengan error handling
+      let isoString = "Invalid Date";
+      try {
+        isoString = date.toISOString();
+        console.log("📅 Date.toISOString():", isoString);
+      } catch (error) {
+        console.log("❌ Error saat toISOString():", error.message);
+        console.log("   Date object:", date);
+        console.log("   getTime():", date.getTime());
+      }
+      
+      console.log("📅 Is NaN:", isNaN(date.getTime()));
+      
+      if (isNaN(date.getTime())) {
+        console.log("❌ Timestamp tidak valid setelah parsing");
+        console.log("   Date object:", date);
+        console.log("   getTime():", date.getTime());
+        console.log("   toString():", date.toString());
+        
+        // Coba alternatif parsing
+        console.log("🔄 Mencoba alternatif parsing...");
+        
+        // Coba parse sebagai string jika object
+        if (typeof timestamp === 'object' && timestamp !== null) {
+          try {
+            const timestampStr = JSON.stringify(timestamp);
+            console.log("   Mencoba parse JSON string:", timestampStr);
+            date = new Date(timestampStr);
+            console.log("   Alternatif parsing result:", date);
+            console.log("   Is valid:", !isNaN(date.getTime()));
+            
+            // Test toISOString lagi
+            try {
+              const newIsoString = date.toISOString();
+              console.log("   New toISOString():", newIsoString);
+            } catch (e) {
+              console.log("   New toISOString() error:", e.message);
+            }
+          } catch (e) {
+            console.log("   Alternatif parsing failed:", e);
+          }
+        }
+        
+        // Jika masih tidak valid, coba dengan waktu saat ini
+        if (isNaN(date.getTime()) && typeof timestamp === 'string') {
+          console.log("🕐 Mencoba dengan waktu saat ini...");
+          const now = new Date();
+          const timeStr = timestamp.trim();
+          
+          // Coba berbagai format waktu
+          const timeFormats = [
+            /^(\d{1,2}):(\d{1,2}):(\d{1,2})$/, // HH:MM:SS
+            /^(\d{1,2}):(\d{1,2})$/, // HH:MM
+            /^(\d{1,2})$/, // HH
+          ];
+          
+          for (const format of timeFormats) {
+            const match = timeStr.match(format);
+            if (match) {
+              console.log(`   Matched format: ${format.source}`);
+              const [hours, minutes = 0, seconds = 0] = match.slice(1);
+              
+              date = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate(),
+                parseInt(hours),
+                parseInt(minutes),
+                parseInt(seconds)
+              );
+              
+              console.log("   Created date with current date:", date);
+              console.log("   Is valid:", !isNaN(date.getTime()));
+              break;
+            }
+          }
+        }
+        
+        // Jika masih tidak valid
+        if (isNaN(date.getTime())) {
+          console.log("🔍 DEBUG TIMESTAMP END");
+          console.log("=".repeat(50));
+          return "Waktu tidak valid";
+        }
+      }
+
+      console.log("✅ Timestamp berhasil diparse:", date);
+      
+      // Safe toISOString untuk final check
+      try {
+        const finalIsoString = date.toISOString();
+        console.log("📅 Final Date object:", finalIsoString);
+      } catch (error) {
+        console.log("❌ Final toISOString error:", error.message);
+        console.log("🔍 DEBUG TIMESTAMP END");
+        console.log("=".repeat(50));
+        return "Waktu tidak valid";
+      }
+
+      // Format ke bahasa Indonesia dengan error handling
+      let formattedDate;
+      try {
+        formattedDate = date.toLocaleString('id-ID', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        });
+      } catch (error) {
+        console.log("❌ Error saat format locale:", error.message);
+        // Fallback ke format sederhana
+        try {
+          formattedDate = date.toString();
+        } catch (e) {
+          formattedDate = "Waktu tidak valid";
+        }
+      }
+      
+      console.log("🎯 Hasil format:", formattedDate);
+      console.log("🔍 DEBUG TIMESTAMP END");
+      console.log("=".repeat(50));
+      return formattedDate;
+    }
+
+    function testTimestampFormats() {
+      const results = document.getElementById('format-results');
+      results.innerHTML = '<div class="debug-info">Testing berbagai format timestamp...</div>';
+      
+      const testCases = [
+        { name: "ISO String", value: "2024-01-15T10:30:00.000Z" },
+        { name: "Unix Timestamp (seconds)", value: 1705312200 },
+        { name: "Unix Timestamp (milliseconds)", value: 1705312200000 },
+        { name: "Date String", value: "2024-01-15 10:30:00" },
+        { name: "Firebase Timestamp Object", value: { seconds: 1705312200, nanoseconds: 0 } },
+        { name: "Firebase Timestamp with _seconds", value: { _seconds: 1705312200, _nanoseconds: 0 } },
+        { name: "Invalid String", value: "invalid-date" },
+        { name: "Null", value: null },
+        { name: "Undefined", value: undefined },
+        { name: "Empty String", value: "" }
+      ];
+
+      let output = '';
+      testCases.forEach(test => {
+        const result = formatTimestamp(test.value);
+        const isValid = result !== "Waktu tidak valid" && result !== "Waktu tidak tersedia" && result !== "Error parsing waktu";
+        const className = isValid ? 'success' : 'error';
+        
+        output += `<div class="result ${className}">
+<strong>${test.name}:</strong> ${result}
+Input: ${JSON.stringify(test.value)}
+</div>`;
+      });
+      
+      results.innerHTML = output;
+    }
+
+    function testFirebaseTimestamp() {
+      const results = document.getElementById('firebase-results');
+      results.innerHTML = '<div class="debug-info">Testing Firebase timestamp objects...</div>';
+      
+      const now = Math.floor(Date.now() / 1000);
+      const testCases = [
+        { name: "Current Firebase Timestamp", value: { seconds: now, nanoseconds: 0 } },
+        { name: "Firebase Timestamp with _seconds", value: { _seconds: now, _nanoseconds: 0 } },
+        { name: "Firebase Timestamp (string seconds)", value: { seconds: now.toString(), nanoseconds: 0 } },
+        { name: "Firebase Timestamp (mixed types)", value: { seconds: now, nanoseconds: "0" } }
+      ];
+
+      let output = '';
+      testCases.forEach(test => {
+        const result = formatTimestamp(test.value);
+        const isValid = result !== "Waktu tidak valid" && result !== "Waktu tidak tersedia" && result !== "Error parsing waktu";
+        const className = isValid ? 'success' : 'error';
+        
+        output += `<div class="result ${className}">
+<strong>${test.name}:</strong> ${result}
+Input: ${JSON.stringify(test.value)}
+</div>`;
+      });
+      
+      results.innerHTML = output;
+    }
+
+    function testDateObject() {
+      const results = document.getElementById('date-results');
+      results.innerHTML = '<div class="debug-info">Testing Date objects...</div>';
+      
+      const now = new Date();
+      const testCases = [
+        { name: "Current Date Object", value: now },
+        { name: "Date from ISO String", value: new Date("2024-01-15T10:30:00.000Z") },
+        { name: "Date from Timestamp", value: new Date(1705312200000) }
+      ];
+
+      let output = '';
+      testCases.forEach(test => {
+        const result = formatTimestamp(test.value);
+        const isValid = result !== "Waktu tidak valid" && result !== "Waktu tidak tersedia" && result !== "Error parsing waktu";
+        const className = isValid ? 'success' : 'error';
+        
+        output += `<div class="result ${className}">
+<strong>${test.name}:</strong> ${result}
+Input: ${test.value.toString()}
+</div>`;
+      });
+      
+      results.innerHTML = output;
+    }
+
+    function testCustomTimestamp() {
+      const input = document.getElementById('custom-timestamp').value;
+      const results = document.getElementById('custom-results');
+      
+      if (!input.trim()) {
+        results.innerHTML = '<div class="error">Masukkan timestamp untuk ditest</div>';
+        return;
+      }
+      
+      results.innerHTML = '<div class="debug-info">Testing custom timestamp...</div>';
+      
+      let parsedInput;
+      try {
+        // Coba parse sebagai JSON jika mungkin
+        parsedInput = JSON.parse(input);
+      } catch (e) {
+        // Jika bukan JSON, gunakan string asli
+        parsedInput = input;
+      }
+      
+      const result = formatTimestamp(parsedInput);
+      const isValid = result !== "Waktu tidak valid" && result !== "Waktu tidak tersedia" && result !== "Error parsing waktu";
+      const className = isValid ? 'success' : 'error';
+      
+      results.innerHTML = `<div class="result ${className}">
+<strong>Custom Timestamp:</strong> ${result}
+Input: ${JSON.stringify(parsedInput)}
+Type: ${typeof parsedInput}
+</div>`;
+    }
+
+    function clearConsole() {
+      console.clear();
+      alert('Console telah dibersihkan!');
+    }
+
+    // Auto-run test saat halaman dimuat
+    window.onload = function() {
+      console.log("🚀 Test Timestamp Debug Page Loaded");
+      console.log("📅 Current time:", new Date().toISOString());
+    };
+  </script>
+</body>
+</html> 

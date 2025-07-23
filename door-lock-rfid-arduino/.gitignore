@@ -1,0 +1,24 @@
+# Arduino build files
+*.elf
+*.bin
+*.hex
+*.eep
+*.d
+*.map
+*.out
+*.a
+*.o
+*.lst
+
+# Arduino IDE files
+*.ino.*.d
+*.ino.*.o
+*.ino.*.bin
+*.ino.*.elf
+
+# OS junk files
+.DS_Store
+Thumbs.db
+
+# PlatformIO
+.pio/ 

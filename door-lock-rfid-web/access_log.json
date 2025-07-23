@@ -1,0 +1,607 @@
+{
+    "room1": {
+      "sensor_pir": {
+        "motion_detected": false
+      },
+      "door_status": {
+        "solenoid_locked": true
+      },
+      "schedule": [
+        {
+          "day": "Senin",
+          "start_time": "07:30",
+          "end_time": "13:50",
+          "matkul": "Bengkel Mekanik dan Elektronika",
+          "kelas": "1B-ELKA3",
+          "card_id" : [
+            "6da3341f",
+            "961dd605",
+            "956cd605"
+          ],
+          "lecturer": [
+            "Muh. Chaerur Rijal, S.T.,M.T",
+            "Ir. Kifaya, M.T",
+            "Maya Itasari, S.T., M.T"
+          ]
+        },
+        {
+          "day": "Senin",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "9abc7900",
+          "lecturer": "Syamruddin, S.T.,M.T"
+        },
+        {
+          "day": "Senin",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Selasa",
+          "start_time": "17:30",
+          "end_time": "23:59",
+          "card_id" : [
+            "6da3341f",
+            "961dd605",
+            "956cd605"
+          ],
+          "lecturer": [
+            "Muh. Chaerur Rijal, S.T.,M.T",
+            "Ir. Kifaya, M.T",
+            "Maya Itasari, S.T., M.T"
+          ]
+        },
+        {
+          "day": "Selasa",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "9abc7900",
+          "lecturer": "Syamruddin, S.T.,M.T"
+        },
+        {
+          "day": "Selasa",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Rabu",
+          "start_time": "07:30",
+          "end_time": "13:50",
+          "matkul": "Bengkel Mekanik dan Elektronika",
+          "kelas": "1C-ELKA3",
+          "card_id" : [
+            "6da3341f",
+            "961dd605",
+            "956cd605"
+          ],
+          "lecturer": [
+            "Muh. Chaerur Rijal, S.T.,M.T",
+            "Ir. Kifaya, M.T",
+            "Maya Itasari, S.T., M.T"
+          ]
+        },
+        {
+          "day": "Rabu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "9abc7900",
+          "lecturer": "Syamruddin, S.T.,M.T"
+        },
+        {
+          "day": "Rabu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Kamis",
+          "start_time": "07:30",
+          "end_time": "13:50",
+          "matkul": "Bengkel Mekanik dan Elektronika",
+          "kelas": "1A-ELKA4",
+          "card_id" : [
+            "6da3341f",
+            "961dd605",
+            "956cd605"
+          ],
+          "lecturer": [
+            "Muh. Chaerur Rijal, S.T.,M.T",
+            "Ir. Kifaya, M.T",
+            "Maya Itasari, S.T., M.T"
+          ]
+        },
+        {
+          "day": "Kamis",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "9abc7900",
+          "lecturer": "Syamruddin, S.T.,M.T"
+        },
+        {
+          "day": "Kamis",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Jumat",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "9abc7900",
+          "lecturer": "Syamruddin, S.T.,M.T"
+        },
+        {
+          "day": "Jumat",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Sabtu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "9abc7900",
+          "lecturer": "Syamruddin, S.T.,M.T"
+        },
+        {
+          "day": "Sabtu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Minggu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "9abc7900",
+          "lecturer": "Syamruddin, S.T.,M.T"
+        },
+        {
+          "day": "Minggu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        }
+      ],
+      "access_history": {
+        "access_records": [
+          {
+            "card_id": "85e5e1e3e10",
+            "timestamp": "2025-02-08T08:00:00Z",
+            "status": "granted"
+          },
+          {
+            "card_id": "585e5e1e3e1",
+            "timestamp": "2025-02-08T14:00:00Z",
+            "status": "denied"
+          }
+        ]
+      }
+    },
+    "room2": {
+      "sensor_pir": {
+        "motion_detected": false
+      },
+      "door_status": {
+        "solenoid_locked": true
+      },
+      "schedule": [
+        {
+        "day": "Senin",
+        "start_time": "07:30",
+        "end_time": "12:00",
+        "matkul": "Elektronika Industri",
+        "kelas": "2B-ELKA3",
+        "card_id" : [
+          "aec2d805",
+          "d4a71e85",
+          "d9d1d605"
+        ],
+        "lecturer": [
+          "Zainal Abidin, S.T., M.T",
+          "Kartika Dewi, S.T.,M.T",
+          "Auliya Nabila, S.T., M.T"
+        ]
+        },
+        {
+          "day": "Senin",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "5e487e00",
+          "lecturer": "Syukri, S.T.,M.T"
+        },
+        {
+          "day": "Senin",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Selasa",
+          "start_time": "13:50",
+          "end_time": "19:50",
+          "card_id" : [
+            "aec2d805",
+            "d4a71e85",
+            "d9d1d605"
+          ],
+          "lecturer": [
+            "Zainal Abidin, S.T., M.T",
+            "Kartika Dewi, S.T.,M.T",
+            "Auliya Nabila, S.T., M.T"
+          ]
+        },
+        {
+          "day": "Selasa",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "5e487e00",
+          "lecturer": "Syukri, S.T.,M.T"
+        },
+        {
+          "day": "Selasa",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Rabu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "5e487e00",
+          "lecturer": "Syukri, S.T.,M.T"
+        },
+        {
+          "day": "Rabu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Rabu",
+          "start_time": "13:50",
+          "end_time": "19:50",
+          "matkul": "Praktikum Sistem Kendali",
+          "kelas": "2C-ELKA3",
+          "card_id" : [
+            "9cd3d505",
+            "961dd605",
+            "d9d1d605 "
+          ],
+          "lecturer": [
+            "Dharma Aryani, S.T., M.T.,Ph.D.",
+            "Ir. Kifaya, M.T",
+            "Auliya Nabila, S.T., M.T"
+          ]
+        },
+        {
+          "day": "Kamis",
+          "start_time": "07:30",
+          "end_time": "12:00",
+          "matkul": "Elektronika Industri",
+          "kelas": "2A-ELKA3",
+          "card_id" : [
+            "aec2d805",
+            "d4a71e85",
+            "d9d1d605"
+          ],
+          "lecturer": [
+            "Zainal Abidin, S.T., M.T",
+            "Kartika Dewi, S.T.,M.T",
+            "Auliya Nabila, S.T., M.T"
+          ]
+        },
+        {
+          "day": "Kamis",
+          "start_time": "13:50",
+          "end_time": "19:50",
+          "matkul": "Praktikum Sistem Kendali",
+          "kelas": "2B-ELKA3",
+          "card_id" : [
+            "9cd3d505",
+            "961dd605",
+            "d9d1d605 "
+          ],
+          "lecturer": [
+            "Dharma Aryani, S.T., M.T.,Ph.D.",
+            "Ir. Kifaya, M.T",
+            "Auliya Nabila, S.T., M.T"
+          ]
+        },
+        {
+          "day": "Kamis",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "5e487e00",
+          "lecturer": "Syukri, S.T.,M.T"
+        },
+        {
+          "day": "Kamis",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Jumat",
+          "start_time": "07:30",
+          "end_time": "13:50",
+          "matkul": "Praktikum Sistem Kendali",
+          "kelas": "2A-ELKA3",
+          "card_id" : [
+            "9cd3d505",
+            "961dd605",
+            "d9d1d605 "
+          ],
+          "lecturer": [
+            "Dharma Aryani, S.T., M.T.,Ph.D.",
+            "Ir. Kifaya, M.T",
+            "Auliya Nabila, S.T., M.T"
+          ]
+        },
+        {
+          "day": "Jumat",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "5e487e00",
+          "lecturer": "Syukri, S.T.,M.T"
+        },
+        {
+          "day": "Jumat",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Sabtu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "5e487e00",
+          "lecturer": "Syukri, S.T.,M.T"
+        },
+        {
+          "day": "Sabtu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Minggu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "5e487e00",
+          "lecturer": "Syukri, S.T.,M.T"
+        },
+        {
+          "day": "Minggu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        }
+      ],
+      "access_history": {
+        "access_records": [
+          {
+            "card_id": "85e5e1e3e10",
+            "timestamp": "2025-02-08T08:00:00Z",
+            "status": "granted"
+          },
+          {
+            "card_id": "585e5e1e3e1",
+            "timestamp": "2025-02-08T14:00:00Z",
+            "status": "denied"
+          }
+        ]
+      }
+    },
+    "room3": {
+      "sensor_pir": {
+        "motion_detected": false
+      },
+      "door_status": {
+        "solenoid_locked": true
+      },
+      "schedule": [
+        {
+          "day": "Senin",
+          "start_time": "13:50",
+          "end_time": "19:50",
+          "matkul": "Praktikum Elektronika Sequensial",
+          "kelas": "2A-ELKA3",
+          "card_id" : [
+            "bda4d505",
+            "8392d605",
+            "6990d605"
+          ],
+          "lecturer": [
+            "Reski Praminasari, S.T.,M.T.",
+            "Ir. Daniel Kambuno, M.T.",
+            "Bagus Prasetiyo, S.Pd.,M.T."
+          ]
+        },
+        {
+          "day": "Senin",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "9b5cd605",
+          "lecturer": "Dina Desriani "
+        },
+        {
+          "day": "Senin",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Selasa",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "9b5cd605",
+          "lecturer": "Dina Desriani "
+        },
+        {
+          "day": "Selasa",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Rabu",
+          "start_time": "07:30",
+          "end_time": "13:50",
+          "matkul": "Praktikum Elektronika Sequensial",
+          "kelas": "2C-ELKA3",
+          "card_id" : [
+            "bda4d505",
+            "8392d605",
+            "6990d605"
+          ],
+          "lecturer": [
+            "Reski Praminasari, S.T.,M.T.",
+            "Ir. Daniel Kambuno, M.T.",
+            "Bagus Prasetiyo, S.Pd.,M.T."
+          ]
+        },
+        {
+          "day": "Rabu",
+          "start_time": "13:50",
+          "end_time": "19:50",
+          "matkul": "Praktikum Elektronika Sequensial",
+          "kelas": "2B-ELKA3",
+          "card_id" : [
+            "bda4d505",
+            "8392d605",
+            "6990d605"
+          ],
+          "lecturer": [
+            "Reski Praminasari, S.T.,M.T.",
+            "Ir. Daniel Kambuno, M.T.",
+            "Bagus Prasetiyo, S.Pd.,M.T."
+          ]
+        },
+        {
+          "day": "Rabu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "9b5cd605",
+          "lecturer": "Dina Desriani "
+        },
+        {
+          "day": "Rabu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Kamis",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "9b5cd605",
+          "lecturer": "Dina Desriani "
+        },
+        {
+          "day": "Kamis",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Jumat",
+          "start_time": "08:20",
+          "end_time": "10:00",
+          "matkul": "Mikrokontroler",
+          "kelas": "2C-ELKA3",
+          "card_id": "6da3341f",
+          "lecturer": "Muh. Chaerur Rijal, S.T.,M.T"
+        },
+        {
+          "day": "Jumat",
+          "start_time": "10:20",
+          "end_time": "12:00",
+          "matkul": "Mikrokontroler",
+          "kelas": "2B-ELKA3",
+          "card_id": "6da3341f",
+          "lecturer": "Muh. Chaerur Rijal, S.T.,M.T"
+        },
+        {
+          "day": "Jumat",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "9b5cd605",
+          "lecturer": "Dina Desriani "
+        },
+        {
+          "day": "Jumat",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Sabtu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "9b5cd605",
+          "lecturer": "Dina Desriani "
+        },
+        {
+          "day": "Sabtu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        },
+        {
+          "day": "Minggu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "9b5cd605",
+          "lecturer": "Dina Desriani "
+        },
+        {
+          "day": "Minggu",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "card_id": "7677d505",
+          "lecturer": "Rumah Tangga"
+        }
+      ],
+      "access_history": {
+        "access_records": [
+          {
+            "card_id": "85e5e1e3e10",
+            "timestamp": "2025-02-08T08:00:00Z",
+            "status": "granted"
+          },
+          {
+            "card_id": "585e5e1e3e1",
+            "timestamp": "2025-02-08T14:00:00Z",
+            "status": "denied"
+          }
+        ]
+      }
+    }
+}
+
+
+
+  
